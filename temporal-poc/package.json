@@ -1,0 +1,37 @@
+{
+  "name": "temporal-supplier-lifecycle-poc",
+  "version": "1.0.0",
+  "description": "Temporal PoC for Supplier Lifecycle Workflow Engine",
+  "main": "dist/client.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "worker": "ts-node src/worker.ts",
+    "start-workflow": "ts-node scripts/start-workflow.ts",
+    "query-workflow": "ts-node scripts/query-workflow.ts",
+    "example": "ts-node examples/full-lifecycle-example.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "temporal",
+    "workflow",
+    "supplier",
+    "lifecycle"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@temporalio/client": "^1.10.0",
+    "@temporalio/worker": "^1.10.0",
+    "@temporalio/workflow": "^1.10.0",
+    "@temporalio/activity": "^1.10.0",
+    "uuid": "^9.0.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
