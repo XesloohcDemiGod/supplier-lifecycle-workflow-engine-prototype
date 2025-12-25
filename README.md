@@ -10,6 +10,8 @@ A comprehensive prototype system for managing the supplier lifecycle from initia
 - **[PR Review](./PR_REVIEW.md)** - Comprehensive review of PR #3 (Production Hardening)
 - **[Product Roadmap](./ROADMAP.md)** - Detailed roadmap for 2026-2027
 - **[Review & Roadmap Summary](./REVIEW_AND_ROADMAP_SUMMARY.md)** - Executive summary
+- **[Workflow Engine Evaluation](./WORKFLOW_ENGINE_EVALUATION.md)** - Comprehensive evaluation of Temporal and alternatives
+- **[Workflow Engine Quick Comparison](./WORKFLOW_ENGINE_QUICK_COMPARISON.md)** - Executive summary for tech roundtable
 
 ## Features
 
