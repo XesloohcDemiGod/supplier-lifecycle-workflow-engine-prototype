@@ -16,10 +16,11 @@ const initializeDatabase = require('./database/init-db');
 
 // Middleware
 const { skipHealthCheck } = require('./middleware/request-logger.middleware');
-const { errorHandler, notFoundHandler } = require('./middleware/error.middleware');
+const { errorHandler, notFoundHandler, asyncHandler } = require('./middleware/error.middleware');
 const { securityHeadersMiddleware } = require('./middleware/security-headers.middleware');
 const { sanitizationMiddleware } = require('./middleware/sanitization.middleware');
 const { ipRateLimiter, tieredRateLimiter } = require('./middleware/rate-limit.middleware');
+const { authenticate, authorize } = require('./middleware/auth.middleware');
 
 // Routes
 const authRoutes = require('./routes/auth.routes');
@@ -169,35 +170,18 @@ app.get('/api/states', (req, res) => {
 });
 
 // Security metrics endpoint (admin only)
-app.get('/api/security/metrics', async (req, res) => {
-  const { authenticate, authorize } = require('./middleware/auth.middleware');
+app.get('/api/security/metrics', authenticate, authorize('Admin'), asyncHandler(async (req, res) => {
   const { getSecurityMetrics } = require('./utils/security-logger');
   
-  // Authenticate and authorize
-  try {
-    await new Promise((resolve, reject) => {
-      authenticate(req, res, (err) => err ? reject(err) : resolve());
-    });
-    
-    await new Promise((resolve, reject) => {
-      authorize('Admin')(req, res, (err) => err ? reject(err) : resolve());
-    });
-    
-    const windowHours = parseInt(req.query.hours) || 24;
-    const metrics = await getSecurityMetrics(windowHours);
-    
-    res.json({
-      success: true,
-      metrics,
-      windowHours
-    });
-  } catch (error) {
-    res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Admin access required'
-    });
-  }
-});
+  const windowHours = parseInt(req.query.hours) || 24;
+  const metrics = await getSecurityMetrics(windowHours);
+  
+  res.json({
+    success: true,
+    metrics,
+    windowHours
+  });
+}));
 
 // 404 handler
 app.use(notFoundHandler);

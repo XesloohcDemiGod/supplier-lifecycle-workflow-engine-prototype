@@ -92,8 +92,10 @@ if (config.env === 'production') {
     process.exit(1);
   }
   
-  if (config.jwt.expiresIn !== '15m') {
-    console.warn('WARNING: JWT_EXPIRES_IN should be 15m for production');
+  // Check JWT expiry is reasonable (between 5 minutes and 1 hour)
+  const expiryMs = parseTime(config.jwt.expiresIn);
+  if (expiryMs < 5 * 60 * 1000 || expiryMs > 60 * 60 * 1000) {
+    console.warn('WARNING: JWT_EXPIRES_IN should be between 5 minutes and 1 hour for production (currently: ' + config.jwt.expiresIn + ')');
   }
 }
 

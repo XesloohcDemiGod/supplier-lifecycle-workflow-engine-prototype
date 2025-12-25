@@ -78,8 +78,20 @@ class InMemoryStore {
 // In-memory store instance
 const store = new InMemoryStore();
 
-// Cleanup every minute
-setInterval(() => store.cleanup(), 60000);
+// Cleanup flag to prevent multiple intervals
+let cleanupInterval = null;
+
+// Start cleanup if not already running
+const startCleanup = () => {
+  if (!cleanupInterval) {
+    cleanupInterval = setInterval(() => store.cleanup(), 60000);
+  }
+};
+
+// Initialize cleanup
+if (process.env.NODE_ENV !== 'test') {
+  startCleanup();
+}
 
 /**
  * Custom rate limit handler

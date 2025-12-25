@@ -25,8 +25,9 @@ class CircuitBreaker {
   async execute(fn) {
     if (this.state === 'OPEN') {
       if (Date.now() < this.nextAttempt) {
-        const error = new Error('Circuit breaker is OPEN');
-        error.statusCode = 503;
+        const ServiceUnavailableError = require('../middleware/error.middleware').ServiceUnavailableError || Error;
+        const error = new ServiceUnavailableError('Service temporarily unavailable due to circuit breaker');
+        error.circuitBreakerOpen = true;
         throw error;
       }
       

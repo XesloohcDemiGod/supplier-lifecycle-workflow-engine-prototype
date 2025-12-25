@@ -122,7 +122,7 @@ const validators = {
   safeString: (maxLength = 255) => Joi.string()
     .trim()
     .max(maxLength)
-    .pattern(/^[a-zA-Z0-9\s\-_.,'"\n\r]+$/)
+    .pattern(/^[a-zA-Z0-9\s\-_.,'"\t]+$/)
     .messages({
       'string.max': `Must not exceed ${maxLength} characters`,
       'string.pattern.base': 'Contains invalid characters'

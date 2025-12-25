@@ -109,10 +109,12 @@ const sanitizeUrl = (input) => {
   try {
     const url = new URL(input);
     if (!['http:', 'https:'].includes(url.protocol)) {
+      logger.warn('Invalid URL protocol attempted:', { protocol: url.protocol });
       return '';
     }
     return url.toString();
-  } catch {
+  } catch (error) {
+    logger.warn('Invalid URL format:', { input: input.substring(0, 50) });
     return '';
   }
 };
