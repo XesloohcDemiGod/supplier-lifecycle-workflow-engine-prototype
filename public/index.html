@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Lifecycle Management - Second Brain</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Supplier Lifecycle Management</h1>
+        <p>Second Brain for Managing Supplier Journey</p>
+    </header>
+
+    <nav>
+        <button onclick="showSection('buyer-request')" class="nav-btn active">Buyer Request</button>
+        <button onclick="showSection('supplier-registration')" class="nav-btn">Supplier Registration</button>
+        <button onclick="showSection('task-manager')" class="nav-btn">Task Manager</button>
+        <button onclick="showSection('supplier-360')" class="nav-btn">Supplier 360</button>
+    </nav>
+
+    <main>
+        <!-- Buyer Request Section -->
+        <section id="buyer-request" class="content-section active">
+            <h2>Buyer Request - Create New Supplier</h2>
+            <form id="buyer-request-form">
+                <div class="form-group">
+                    <label for="companyName">Company Name *</label>
+                    <input type="text" id="companyName" name="companyName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactEmail">Contact Email *</label>
+                    <input type="email" id="contactEmail" name="contactEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactPhone">Contact Phone</label>
+                    <input type="tel" id="contactPhone" name="contactPhone">
+                </div>
+                
+                <div class="form-group">
+                    <label for="businessType">Business Type</label>
+                    <select id="businessType" name="businessType">
+                        <option value="Manufacturer">Manufacturer</option>
+                        <option value="Distributor">Distributor</option>
+                        <option value="Service Provider">Service Provider</option>
+                        <option value="Consultant">Consultant</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="categories">Categories (comma separated)</label>
+                    <input type="text" id="categories" name="categories" placeholder="e.g., Electronics, Components">
+                </div>
+                
+                <div class="form-group">
+                    <label for="requestedBy">Requested By *</label>
+                    <input type="text" id="requestedBy" name="requestedBy" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+            </form>
+            <div id="buyer-request-result" class="result-box"></div>
+        </section>
+
+        <!-- Supplier Registration Section -->
+        <section id="supplier-registration" class="content-section">
+            <h2>Supplier Registration Portal</h2>
+            <div class="form-group">
+                <label for="supplierIdForReg">Supplier ID (from invitation)</label>
+                <input type="text" id="supplierIdForReg" placeholder="Enter your supplier ID">
+            </div>
+            
+            <form id="supplier-registration-form">
+                <div class="form-group">
+                    <label for="regContactEmail">Contact Email *</label>
+                    <input type="email" id="regContactEmail" name="contactEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regTaxId">Tax ID</label>
+                    <input type="text" id="regTaxId" name="taxId">
+                </div>
+                
+                <div class="form-group">
+                    <label for="regBusinessType">Business Type</label>
+                    <select id="regBusinessType" name="businessType">
+                        <option value="Manufacturer">Manufacturer</option>
+                        <option value="Distributor">Distributor</option>
+                        <option value="Service Provider">Service Provider</option>
+                        <option value="Consultant">Consultant</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="regStreet" name="street" placeholder="Street">
+                    <input type="text" id="regCity" name="city" placeholder="City">
+                    <input type="text" id="regState" name="state" placeholder="State">
+                    <input type="text" id="regZip" name="zip" placeholder="Zip Code">
+                    <input type="text" id="regCountry" name="country" placeholder="Country">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Complete Registration</button>
+            </form>
+            <div id="supplier-registration-result" class="result-box"></div>
+        </section>
+
+        <!-- Task Manager Section -->
+        <section id="task-manager" class="content-section">
+            <h2>Task Manager - Internal Operations</h2>
+            <div class="controls">
+                <button onclick="loadTasks('PENDING')" class="btn">Pending Tasks</button>
+                <button onclick="loadTasks('COMPLETED')" class="btn">Completed Tasks</button>
+                <button onclick="loadTasks('ALL')" class="btn">All Tasks</button>
+            </div>
+            <div id="task-list" class="list-container"></div>
+        </section>
+
+        <!-- Supplier 360 Section -->
+        <section id="supplier-360" class="content-section">
+            <h2>Supplier 360 Overview</h2>
+            <div class="controls">
+                <button onclick="loadAllSuppliers()" class="btn btn-primary">Load All Suppliers</button>
+                <select id="stateFilter" onchange="filterSuppliersByState()">
+                    <option value="">Filter by State</option>
+                    <option value="REQUESTED">REQUESTED</option>
+                    <option value="PENDING_REGISTRATION">PENDING_REGISTRATION</option>
+                    <option value="REGISTERED">REGISTERED</option>
+                    <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                    <option value="APPROVED_FOR_ERP">APPROVED_FOR_ERP</option>
+                    <option value="ERP_SYNC_IN_PROGRESS">ERP_SYNC_IN_PROGRESS</option>
+                    <option value="ERP_SYNCED">ERP_SYNCED</option>
+                    <option value="UNDER_QUALIFICATION">UNDER_QUALIFICATION</option>
+                    <option value="QUALIFIED">QUALIFIED</option>
+                    <option value="DISQUALIFIED">DISQUALIFIED</option>
+                    <option value="REJECTED">REJECTED</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                </select>
+            </div>
+            <div id="supplier-list" class="list-container"></div>
+            <div id="supplier-detail" class="detail-container"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Supplier Lifecycle Management System - Prototype v1.0</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
