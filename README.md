@@ -13,6 +13,7 @@ A comprehensive prototype system for managing the supplier lifecycle from initia
 - **[Review & Roadmap Summary](./REVIEW_AND_ROADMAP_SUMMARY.md)** - Executive summary
 
 ### Workflow Engine Evaluation (New!)
+- **[Executive Summary](./WORKFLOW_ENGINE_EXECUTIVE_SUMMARY.md)** - One-page overview for stakeholders
 - **[Workflow Engine Evaluation](./WORKFLOW_ENGINE_EVALUATION.md)** - Comprehensive 40+ page evaluation of Temporal and alternatives
 - **[Quick Comparison Guide](./WORKFLOW_ENGINE_QUICK_COMPARISON.md)** - Executive summary and decision framework
 - **[Presentation Slides](./WORKFLOW_ENGINE_PRESENTATION.md)** - Ready-to-present slide deck
