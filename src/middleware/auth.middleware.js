@@ -183,7 +183,7 @@ const authenticate = async (req, res, next) => {
  * Check if user has required role(s)
  */
 const authorize = (...allowedRoles) => {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
         error: 'Authentication required'
@@ -347,7 +347,7 @@ const optionalAuthenticate = async (req, res, next) => {
 /**
  * Prevent role escalation
  */
-const preventRoleEscalation = (req, res, next) => {
+const preventRoleEscalation = async (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       error: 'Authentication required'
@@ -361,7 +361,7 @@ const preventRoleEscalation = (req, res, next) => {
 
     // Only admins can assign roles
     if (userRole !== 'Admin') {
-      logSecurityEvent(
+      await logSecurityEvent(
         EVENT_TYPES.UNAUTHORIZED_ACCESS,
         SEVERITY.HIGH,
         {

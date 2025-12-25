@@ -225,6 +225,8 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 
 // Periodic cleanup tasks
 const startCleanupTasks = () => {
+  const { cleanupExpiredKeys } = require('./middleware/idempotency.middleware');
+  
   // Clean up expired tokens every hour
   setInterval(async () => {
     try {
@@ -234,6 +236,15 @@ const startCleanupTasks = () => {
       logger.info('Completed periodic token cleanup');
     } catch (error) {
       logger.error('Error in token cleanup:', error);
+    }
+  }, 60 * 60 * 1000); // Every hour
+
+  // Clean up expired idempotency keys every hour
+  setInterval(async () => {
+    try {
+      await cleanupExpiredKeys();
+    } catch (error) {
+      logger.error('Error in idempotency key cleanup:', error);
     }
   }, 60 * 60 * 1000); // Every hour
 };

@@ -118,10 +118,8 @@ const ipRateLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  handler: rateLimitHandler,
-  keyGenerator: (req) => {
-    return req.ip;
-  }
+  handler: rateLimitHandler
+  // Use default keyGenerator which properly handles IPv6
 });
 
 /**
