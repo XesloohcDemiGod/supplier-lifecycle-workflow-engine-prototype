@@ -160,7 +160,7 @@ const supplierSchemas = {
   }),
 
   sendInvite: Joi.object({
-    user: Joi.string().required()
+    // User is determined from JWT token, no need to send in body
   }),
 
   review: Joi.object({

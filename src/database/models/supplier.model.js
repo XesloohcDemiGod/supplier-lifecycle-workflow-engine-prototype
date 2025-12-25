@@ -7,6 +7,7 @@ const db = require('../connection');
 const { v4: uuidv4 } = require('uuid');
 const { STATES } = require('../../state-machine');
 const logger = require('../../utils/logger');
+const { camelToSnake } = require('../../utils/helpers');
 
 class SupplierModel {
   /**
@@ -94,7 +95,7 @@ class SupplierModel {
     ];
     
     for (const [key, value] of Object.entries(updates)) {
-      const dbKey = this.camelToSnake(key);
+      const dbKey = camelToSnake(key);
       if (allowedFields.includes(dbKey)) {
         fields.push(`${dbKey} = ?`);
         if (key === 'categories' && Array.isArray(value)) {
@@ -188,13 +189,6 @@ class SupplierModel {
       createdAt: row.created_at,
       updatedAt: row.updated_at
     };
-  }
-
-  /**
-   * Convert camelCase to snake_case
-   */
-  static camelToSnake(str) {
-    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
   }
 }
 

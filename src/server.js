@@ -29,7 +29,15 @@ const app = express();
 
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: false // Allow inline scripts for our simple UI
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for simple UI
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"]
+    }
+  }
 }));
 
 // CORS

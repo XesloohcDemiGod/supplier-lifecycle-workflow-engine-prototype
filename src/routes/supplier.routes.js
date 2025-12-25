@@ -54,7 +54,6 @@ router.post(
   '/:id/send-invite',
   authenticate,
   authorize('Buyer'),
-  validateBody(supplierSchemas.sendInvite),
   asyncHandler(async (req, res) => {
     const supplier = await workflowEngine.sendRegistrationInvite(req.params.id, req.user.username);
 

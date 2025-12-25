@@ -6,6 +6,7 @@
 const db = require('../connection');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../../utils/logger');
+const { camelToSnake } = require('../../utils/helpers');
 
 class TaskModel {
   /**
@@ -92,7 +93,7 @@ class TaskModel {
     const allowedFields = ['status', 'completed_at', 'completed_by', 'notes', 'assigned_to'];
     
     for (const [key, value] of Object.entries(updates)) {
-      const dbKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+      const dbKey = camelToSnake(key);
       if (allowedFields.includes(dbKey)) {
         fields.push(`${dbKey} = ?`);
         values.push(value);
