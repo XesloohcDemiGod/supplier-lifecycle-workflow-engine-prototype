@@ -2,6 +2,15 @@
 
 A comprehensive prototype system for managing the supplier lifecycle from initial request through qualification. This system implements a 12-state workflow engine with explicit state machines, auditable transitions, and a complete UI for managing supplier interactions.
 
+## 📚 Documentation
+
+- **[Setup Guide](./SETUP.md)** - Complete installation and configuration guide
+- **[API Documentation](./API.md)** - Detailed API endpoint reference
+- **[Implementation Summary](./IMPLEMENTATION_SUMMARY.md)** - Overview of production hardening features
+- **[PR Review](./PR_REVIEW.md)** - Comprehensive review of PR #3 (Production Hardening)
+- **[Product Roadmap](./ROADMAP.md)** - Detailed roadmap for 2026-2027
+- **[Review & Roadmap Summary](./REVIEW_AND_ROADMAP_SUMMARY.md)** - Executive summary
+
 ## Features
 
 ### 🎯 Core Components
@@ -380,14 +389,32 @@ The API is designed to be extended. Common patterns:
 
 ## Future Enhancements
 
-- Database persistence (PostgreSQL, MongoDB)
-- Authentication and authorization
-- Email notifications
-- Document management
+See our comprehensive [Product Roadmap](./ROADMAP.md) for detailed plans:
+
+### Short-Term (Q1 2026)
+- Frontend authentication integration
+- Test coverage improvement (60%+)
+- CI/CD pipeline setup
+- Database optimization
+
+### Medium-Term (Q2-Q3 2026)
+- PostgreSQL migration for scalability
+- Redis caching layer
+- Email and webhook notifications
+- Document management system
 - Real ERP integration
-- Advanced reporting
-- Multi-tenancy
-- Webhooks for state changes
+- Workflow customization
+
+### Long-Term (Q4 2026 - 2027)
+- AI-powered supplier risk assessment
+- Advanced analytics platform
+- Multi-tenancy support
+- Modern React/Vue frontend
+- Mobile applications
+- Contract management
+- Supplier self-service portal
+
+For complete details, see [ROADMAP.md](./ROADMAP.md) and [PR_REVIEW.md](./PR_REVIEW.md).
 
 ## License
 
