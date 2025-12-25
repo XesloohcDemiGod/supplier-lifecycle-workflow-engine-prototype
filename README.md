@@ -4,12 +4,20 @@ A comprehensive prototype system for managing the supplier lifecycle from initia
 
 ## 📚 Documentation
 
+### Core Documentation
 - **[Setup Guide](./SETUP.md)** - Complete installation and configuration guide
 - **[API Documentation](./API.md)** - Detailed API endpoint reference
 - **[Implementation Summary](./IMPLEMENTATION_SUMMARY.md)** - Overview of production hardening features
 - **[PR Review](./PR_REVIEW.md)** - Comprehensive review of PR #3 (Production Hardening)
 - **[Product Roadmap](./ROADMAP.md)** - Detailed roadmap for 2026-2027
 - **[Review & Roadmap Summary](./REVIEW_AND_ROADMAP_SUMMARY.md)** - Executive summary
+
+### Workflow Engine Evaluation (New!)
+- **[Executive Summary](./WORKFLOW_ENGINE_EXECUTIVE_SUMMARY.md)** - One-page overview for stakeholders
+- **[Workflow Engine Evaluation](./WORKFLOW_ENGINE_EVALUATION.md)** - Comprehensive 40+ page evaluation of Temporal and alternatives
+- **[Quick Comparison Guide](./WORKFLOW_ENGINE_QUICK_COMPARISON.md)** - Executive summary and decision framework
+- **[Presentation Slides](./WORKFLOW_ENGINE_PRESENTATION.md)** - Ready-to-present slide deck
+- **[Roundtable Agenda](./WORKFLOW_ENGINE_ROUNDTABLE_AGENDA.md)** - Meeting planning and decision workshop guide
 
 ## Features
 
@@ -391,11 +399,26 @@ The API is designed to be extended. Common patterns:
 
 See our comprehensive [Product Roadmap](./ROADMAP.md) for detailed plans:
 
+### Workflow Engine Evolution ⭐ NEW
+**We've completed a comprehensive evaluation of production-grade workflow orchestration platforms!**
+
+The current custom workflow engine is suitable for prototyping but lacks critical features for production:
+- ❌ In-memory state (data loss on restart)
+- ❌ No durable execution or automatic retries
+- ❌ Limited scalability and monitoring
+
+**Recommended Next Steps:**
+- **Primary**: Migrate to **Temporal** - Best-in-class reliability, proven at scale (3-4 weeks, $500-2000/month)
+- **Alternative**: Start with **BullMQ** - Quick migration path (1-2 weeks, $100-200/month)
+
+See complete analysis in our [Workflow Engine Evaluation](./WORKFLOW_ENGINE_EVALUATION.md) documents.
+
 ### Short-Term (Q1 2026)
 - Frontend authentication integration
 - Test coverage improvement (60%+)
 - CI/CD pipeline setup
 - Database optimization
+- **Workflow engine migration** (Temporal or BullMQ)
 
 ### Medium-Term (Q2-Q3 2026)
 - PostgreSQL migration for scalability

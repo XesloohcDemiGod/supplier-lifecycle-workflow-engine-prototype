@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for Temporal persistence
+  postgresql:
+    image: postgres:15-alpine
+    container_name: temporal-postgresql
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    ports:
+      - "5432:5432"
+    volumes:
+      - temporal-postgres-data:/var/lib/postgresql/data
+    networks:
+      - temporal-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Temporal server (all-in-one development mode)
+  temporal:
+    image: temporalio/auto-setup:latest
+    container_name: temporal-server
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+    ports:
+      - "7233:7233"  # Temporal gRPC
+      - "7234:7234"  # Temporal gRPC
+      - "7235:7235"  # Temporal gRPC
+      - "7239:7239"  # Temporal gRPC
+      - "6933:6933"  # Temporal metrics
+      - "6934:6934"  # Temporal metrics
+      - "6935:6935"  # Temporal metrics
+      - "6939:6939"  # Temporal metrics
+    networks:
+      - temporal-network
+    volumes:
+      - ./temporal-config:/etc/temporal/config/dynamicconfig
+    healthcheck:
+      test: ["CMD", "tctl", "--address", "temporal:7233", "cluster", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Temporal Web UI
+  temporal-ui:
+    image: temporalio/ui:latest
+    container_name: temporal-ui
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    ports:
+      - "8080:8080"  # Web UI
+    networks:
+      - temporal-network
+
+  # Temporal Admin Tools (optional, for database setup and management)
+  temporal-admin-tools:
+    image: temporalio/admin-tools:latest
+    container_name: temporal-admin-tools
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    networks:
+      - temporal-network
+    stdin_open: true
+    tty: true
+    profiles:
+      - tools  # Only start with: docker-compose --profile tools up
+
+volumes:
+  temporal-postgres-data:
+    driver: local
+
+networks:
+  temporal-network:
+    driver: bridge
+
+# Usage:
+# 1. Start all services: docker-compose up -d
+# 2. Check logs: docker-compose logs -f
+# 3. Stop services: docker-compose down
+# 4. Reset everything: docker-compose down -v (removes data!)
+#
+# Access points:
+# - Temporal Server: localhost:7233
+# - Web UI: http://localhost:8080
+# - PostgreSQL: localhost:5432
