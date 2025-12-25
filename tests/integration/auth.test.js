@@ -5,12 +5,12 @@
 const request = require('supertest');
 const app = require('../../src/server');
 const db = require('../../src/database/connection');
-const UserModel = require('../../src/database/models/user.model');
+const initDb = require('../../src/database/init-db');
 
 describe('Authentication API', () => {
   beforeAll(async () => {
-    // Connect to test database
-    await db.connect();
+    // Initialize test database
+    await initDb();
   });
 
   afterAll(async () => {
@@ -23,8 +23,8 @@ describe('Authentication API', () => {
       const response = await request(app)
         .post('/api/auth/register')
         .send({
-          username: 'testuser',
-          email: 'testuser@example.com',
+          username: 'newtestuser',
+          email: 'newtestuser@example.com',
           password: 'password123',
           role: 'Buyer'
         });
@@ -32,7 +32,7 @@ describe('Authentication API', () => {
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.user).toHaveProperty('id');
-      expect(response.body.user.username).toBe('testuser');
+      expect(response.body.user.username).toBe('newtestuser');
       expect(response.body.user.role).toBe('Buyer');
       expect(response.body.user).not.toHaveProperty('password_hash');
     });
@@ -159,23 +159,18 @@ describe('Authentication API', () => {
   });
 
   describe('POST /api/auth/logout', () => {
-    let accessToken;
-    let refreshToken;
-
-    beforeEach(async () => {
-      // Login to get tokens
-      const response = await request(app)
+    test('should logout successfully with valid token', async () => {
+      // Login first
+      const loginResponse = await request(app)
         .post('/api/auth/login')
         .send({
           username: 'admin',
           password: 'admin123'
         });
 
-      accessToken = response.body.accessToken;
-      refreshToken = response.body.refreshToken;
-    });
+      const { accessToken, refreshToken } = loginResponse.body;
 
-    test('should logout successfully with valid token', async () => {
+      // Logout
       const response = await request(app)
         .post('/api/auth/logout')
         .set('Authorization', `Bearer ${accessToken}`)
@@ -188,9 +183,10 @@ describe('Authentication API', () => {
     test('should reject logout without token', async () => {
       const response = await request(app)
         .post('/api/auth/logout')
-        .send({ refreshToken });
+        .send({ refreshToken: 'some-token' });
 
       expect(response.status).toBe(401);
     });
   });
 });
+

@@ -12,17 +12,6 @@
     "test:integration": "jest --testPathPattern=integration",
     "init:db": "node src/database/init-db.js"
   },
-  "jest": {
-    "testEnvironment": "node",
-    "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/database/init-db.js"
-    ],
-    "testMatch": [
-      "**/tests/**/*.test.js"
-    ]
-  },
   "keywords": [
     "supplier",
     "lifecycle",

@@ -4,6 +4,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
 const logger = require('../utils/logger');
 
@@ -15,7 +16,8 @@ const generateAccessToken = (user) => {
     id: user.id,
     username: user.username,
     email: user.email,
-    role: user.role
+    role: user.role,
+    jti: uuidv4() // Unique token ID
   };
 
   return jwt.sign(payload, config.jwt.secret, {
@@ -29,7 +31,8 @@ const generateAccessToken = (user) => {
 const generateRefreshToken = (user) => {
   const payload = {
     id: user.id,
-    username: user.username
+    username: user.username,
+    jti: uuidv4() // Unique token ID
   };
 
   return jwt.sign(payload, config.jwt.secret, {
