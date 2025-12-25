@@ -4,6 +4,7 @@
  */
 
 const Joi = require('joi');
+const config = require('../config');
 
 // Custom validators
 const validators = {
@@ -22,8 +23,10 @@ const validators = {
   phone: Joi.string()
     .pattern(/^\+?[1-9]\d{1,14}$/)
     .trim()
+    .max(20)
     .messages({
-      'string.pattern.base': 'Phone must be in international format (e.g., +1234567890)'
+      'string.pattern.base': 'Phone must be in international format (e.g., +1234567890)',
+      'string.max': 'Phone number must not exceed 20 characters'
     }),
 
   // Tax ID validation (US format: XX-XXXXXXX)
@@ -49,10 +52,12 @@ const validators = {
     .trim()
     .min(2)
     .max(255)
+    .pattern(/^[a-zA-Z0-9\s\-&.,'"()]+$/)
     .required()
     .messages({
       'string.min': 'Company name must be at least 2 characters',
       'string.max': 'Company name must not exceed 255 characters',
+      'string.pattern.base': 'Company name contains invalid characters',
       'any.required': 'Company name is required'
     }),
 
@@ -111,6 +116,24 @@ const validators = {
     .guid({ version: 'uuidv4' })
     .messages({
       'string.guid': 'Must be a valid UUID'
+    }),
+
+  // Safe string (for general text inputs)
+  safeString: (maxLength = 255) => Joi.string()
+    .trim()
+    .max(maxLength)
+    .pattern(/^[a-zA-Z0-9\s\-_.,'"\t]+$/)
+    .messages({
+      'string.max': `Must not exceed ${maxLength} characters`,
+      'string.pattern.base': 'Contains invalid characters'
+    }),
+
+  // Array with max items
+  limitedArray: (itemSchema, maxItems = config.security.maxArraySize) => Joi.array()
+    .items(itemSchema)
+    .max(maxItems)
+    .messages({
+      'array.max': `Array must not exceed ${maxItems} items`
     })
 };
 
@@ -141,21 +164,24 @@ const supplierSchemas = {
     companyName: validators.companyName,
     contactEmail: validators.email.required(),
     contactPhone: validators.phone.optional().allow(null, ''),
-    categories: Joi.array().items(Joi.string().trim().max(100)).default([]),
-    businessType: Joi.string().trim().max(100).optional().allow(null, ''),
+    categories: validators.limitedArray(
+      Joi.string().trim().max(100).pattern(/^[a-zA-Z0-9\s\-_]+$/),
+      config.security.maxArraySize
+    ).default([]),
+    businessType: Joi.string().trim().max(100).pattern(/^[a-zA-Z0-9\s\-_&.]+$/).optional().allow(null, ''),
     requestedBy: Joi.string().required()
   }),
 
   register: Joi.object({
     contactEmail: validators.email.required(),
     taxId: validators.taxId.optional().allow(null, ''),
-    businessType: Joi.string().trim().max(100).optional().allow(null, ''),
+    businessType: Joi.string().trim().max(100).pattern(/^[a-zA-Z0-9\s\-_&.]+$/).optional().allow(null, ''),
     address: Joi.object({
-      street: Joi.string().trim().max(255).optional().allow(null, ''),
-      city: Joi.string().trim().max(100).optional().allow(null, ''),
-      state: Joi.string().trim().max(100).optional().allow(null, ''),
-      zip: Joi.string().trim().max(20).optional().allow(null, ''),
-      country: Joi.string().trim().max(100).optional().allow(null, '')
+      street: Joi.string().trim().max(255).pattern(/^[a-zA-Z0-9\s\-_.,#]+$/).optional().allow(null, ''),
+      city: Joi.string().trim().max(100).pattern(/^[a-zA-Z\s\-]+$/).optional().allow(null, ''),
+      state: Joi.string().trim().max(100).pattern(/^[a-zA-Z\s\-]+$/).optional().allow(null, ''),
+      zip: Joi.string().trim().max(20).pattern(/^[a-zA-Z0-9\s\-]+$/).optional().allow(null, ''),
+      country: Joi.string().trim().max(100).pattern(/^[a-zA-Z\s\-]+$/).optional().allow(null, '')
     }).optional()
   }),
 

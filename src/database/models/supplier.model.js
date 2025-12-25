@@ -8,6 +8,8 @@ const { v4: uuidv4 } = require('uuid');
 const { STATES } = require('../../state-machine');
 const logger = require('../../utils/logger');
 const { camelToSnake } = require('../../utils/helpers');
+const { encrypt, decrypt } = require('../../utils/encryption');
+const { logSecurityEvent, SEVERITY, EVENT_TYPES } = require('../../utils/security-logger');
 
 class SupplierModel {
   /**
@@ -27,12 +29,22 @@ class SupplierModel {
       currentState = STATES.REQUESTED
     } = supplierData;
     
+    // Check for duplicate company name + email (prevent duplicate registrations)
+    const existing = await db.get(
+      'SELECT id FROM suppliers WHERE company_name = ? AND contact_email = ?',
+      [companyName, contactEmail]
+    );
+    
+    if (existing) {
+      throw new Error('A supplier with this company name and email already exists');
+    }
+    
     await db.run(
       `INSERT INTO suppliers (
         id, company_name, contact_email, contact_phone, business_type,
         categories, current_state, requested_by, requested_date,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        created_at, updated_at, version
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         companyName,
@@ -44,7 +56,8 @@ class SupplierModel {
         requestedBy,
         now,
         now,
-        now
+        now,
+        1
       ]
     );
     
@@ -57,6 +70,17 @@ class SupplierModel {
    */
   static async findById(id) {
     const supplier = await db.get('SELECT * FROM suppliers WHERE id = ?', [id]);
+    return supplier ? this.deserialize(supplier) : null;
+  }
+
+  /**
+   * Find supplier by company name and email (for duplicate check)
+   */
+  static async findByCompanyAndEmail(companyName, email) {
+    const supplier = await db.get(
+      'SELECT * FROM suppliers WHERE company_name = ? AND contact_email = ?',
+      [companyName, email]
+    );
     return supplier ? this.deserialize(supplier) : null;
   }
 
@@ -80,16 +104,16 @@ class SupplierModel {
   }
 
   /**
-   * Update supplier
+   * Update supplier with optimistic locking
    */
-  static async update(id, updates) {
+  static async updateWithLocking(id, updates, currentVersion) {
     const fields = [];
     const values = [];
     
     const allowedFields = [
       'company_name', 'contact_email', 'contact_phone', 'address_street',
       'address_city', 'address_state', 'address_zip', 'address_country',
-      'tax_id', 'business_type', 'categories', 'current_state',
+      'tax_id', 'tax_id_encrypted', 'business_type', 'categories', 'current_state',
       'erp_id', 'erp_sync_date', 'qualification_score', 'qualification_date',
       'qualification_notes'
     ];
@@ -100,6 +124,87 @@ class SupplierModel {
         fields.push(`${dbKey} = ?`);
         if (key === 'categories' && Array.isArray(value)) {
           values.push(JSON.stringify(value));
+        } else if (key === 'taxId' && value) {
+          // Encrypt sensitive tax ID
+          fields.push('tax_id_encrypted = ?');
+          values.push(encrypt(value));
+        } else if (key === 'address' && typeof value === 'object') {
+          // Handle address object separately
+          continue;
+        } else {
+          values.push(value);
+        }
+      }
+    }
+    
+    // Handle address object
+    if (updates.address && typeof updates.address === 'object') {
+      const addressFields = ['street', 'city', 'state', 'zip', 'country'];
+      for (const field of addressFields) {
+        if (updates.address[field] !== undefined) {
+          fields.push(`address_${field} = ?`);
+          values.push(updates.address[field]);
+        }
+      }
+    }
+    
+    if (fields.length === 0) {
+      return await this.findById(id);
+    }
+    
+    const newVersion = currentVersion + 1;
+    fields.push('version = ?');
+    values.push(newVersion);
+    
+    fields.push('updated_at = ?');
+    values.push(new Date().toISOString());
+    
+    values.push(id);
+    values.push(currentVersion);
+    
+    const result = await db.run(
+      `UPDATE suppliers SET ${fields.join(', ')} WHERE id = ? AND version = ?`,
+      values
+    );
+    
+    if (result.changes === 0) {
+      await logSecurityEvent(
+        EVENT_TYPES.CONCURRENT_MODIFICATION,
+        SEVERITY.MEDIUM,
+        { supplierId: id, currentVersion, attemptedVersion: newVersion }
+      );
+      throw new Error('Concurrent modification detected. Please refresh and try again.');
+    }
+    
+    logger.info(`Supplier updated with optimistic locking: ${id} (v${currentVersion} -> v${newVersion})`);
+    return await this.findById(id);
+  }
+
+  /**
+   * Update supplier (legacy method without locking)
+   */
+  static async update(id, updates) {
+    const fields = [];
+    const values = [];
+    
+    const allowedFields = [
+      'company_name', 'contact_email', 'contact_phone', 'address_street',
+      'address_city', 'address_state', 'address_zip', 'address_country',
+      'tax_id', 'tax_id_encrypted', 'business_type', 'categories', 'current_state',
+      'erp_id', 'erp_sync_date', 'qualification_score', 'qualification_date',
+      'qualification_notes'
+    ];
+    
+    for (const [key, value] of Object.entries(updates)) {
+      const dbKey = camelToSnake(key);
+      if (allowedFields.includes(dbKey)) {
+        fields.push(`${dbKey} = ?`);
+        if (key === 'categories' && Array.isArray(value)) {
+          values.push(JSON.stringify(value));
+        } else if (key === 'taxId' && value) {
+          // Encrypt sensitive tax ID
+          fields.push('tax_id_encrypted = ?');
+          values.push(encrypt(value));
         } else if (key === 'address' && typeof value === 'object') {
           // Handle address object separately
           continue;
@@ -163,6 +268,16 @@ class SupplierModel {
   static deserialize(row) {
     if (!row) return null;
     
+    // Decrypt tax ID if encrypted
+    let taxId = row.tax_id;
+    if (!taxId && row.tax_id_encrypted) {
+      try {
+        taxId = decrypt(row.tax_id_encrypted);
+      } catch (error) {
+        logger.error('Failed to decrypt tax ID:', error);
+      }
+    }
+    
     return {
       id: row.id,
       companyName: row.company_name,
@@ -175,7 +290,7 @@ class SupplierModel {
         zip: row.address_zip,
         country: row.address_country
       },
-      taxId: row.tax_id,
+      taxId,
       businessType: row.business_type,
       categories: row.categories ? JSON.parse(row.categories) : [],
       currentState: row.current_state,
@@ -187,9 +302,11 @@ class SupplierModel {
       qualificationDate: row.qualification_date,
       qualificationNotes: row.qualification_notes,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
+      version: row.version || 1
     };
   }
 }
 
 module.exports = SupplierModel;
+
