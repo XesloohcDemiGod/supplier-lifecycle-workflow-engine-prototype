@@ -1,0 +1,22 @@
+{
+  "name": "supplier-lifecycle-workflow-engine",
+  "version": "1.0.0",
+  "description": "Supplier Lifecycle Management Second Brain - A prototype workflow engine for managing supplier lifecycle from request to qualification",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "keywords": [
+    "supplier",
+    "lifecycle",
+    "workflow",
+    "state-machine"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  }
+}
